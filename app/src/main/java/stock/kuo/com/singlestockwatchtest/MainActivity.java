@@ -23,6 +23,8 @@ import android.widget.TextView;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedReader;
@@ -32,6 +34,7 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -40,7 +43,9 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = "SingleStockWatchActivity";
 
     // This URL string points to the Google Stock API
-    private static final String GOOGLE_STOCK_URL = "http://www.google.com/ig/api";
+    //private static final String GOOGLE_STOCK_URL = "http://www.google.com/ig/api";
+    //2015 available URL
+    private static final String GOOGLE_STOCK_URL = "http://www.google.com/finance/info?infotype=infoquoteall&q=";
 
     // This URL is used when retrieving the stock activity chart image.
     private static final String GOOGLE_URL = "http://www.google.com";
@@ -114,7 +119,7 @@ public class MainActivity extends ActionBarActivity {
 
         // our "symbol" variable already has the text from the edSymbol view via
         // the onTextChanged() event capture.
-        String request = GOOGLE_STOCK_URL + "?stock=" + symbol;
+        String request = GOOGLE_STOCK_URL + symbol;//symbol:stock No.
 
         StockRetrieveTask task = new StockRetrieveTask();
 
@@ -160,7 +165,21 @@ public class MainActivity extends ActionBarActivity {
             String elementValue = "";
             String nameSpace = "";
 
-            StringReader xmlReader = new StringReader(response);
+            //response handling:double slash & get json object
+            response = response.substring(4, response.length()-1);
+
+            //old xml parser turn to the json parser
+            JSONObject jsonObject = new JSONObject(response);
+            Iterator<?> keys = jsonObject.keys();
+
+            while (keys.hasNext())
+            {
+                String key = (String)keys.next();
+                String value = jsonObject.getString(key);
+                hmStockData.put(key, value);
+            }
+
+            /*StringReader xmlReader = new StringReader(response);
 
             // The XmlPullParser responds to XML "events". As it steps through
             // the passed XML, each different element it encounters triggers an
@@ -188,7 +207,7 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 eventType = parser.next();
-            }
+            }*/
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
