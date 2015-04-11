@@ -238,6 +238,7 @@ public class MainActivity extends ActionBarActivity {
         updateTextView(R.id.tv_change, CHANGE);
         updateTextView(R.id.tv_perc_change, PERC_CHANGE);
 
+        //todo
         if (hmStockData.containsKey(CHART_URL)) {
 
             String chartURL = hmStockData.get(CHART_URL);
