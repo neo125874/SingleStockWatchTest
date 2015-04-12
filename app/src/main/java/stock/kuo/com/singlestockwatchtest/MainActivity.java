@@ -58,7 +58,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String LAST = "last";
     private static final String CHANGE = "change";
     private static final String PERC_CHANGE = "perc_change";
-    private static final String CHART_URL = "chart_url";
+    private static final String CHART_URL = "/finance/getchart?q=";//2015 available for getting chart
 
     // This String refers to the attribute we are collecting for each element in
     // our XML
@@ -76,12 +76,18 @@ public class MainActivity extends ActionBarActivity {
     // This variable will hold the stock symbol value the user has keyed in.
     private String symbol = "";
 
+    //new chart method
+    private ImageView ivChart = null;
+    private static Bitmap bmImg = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         bnRetrieve = (Button) findViewById(R.id.bn_retrieve);
+
+        ivChart = (ImageView) findViewById(R.id.img_chart);
 
         edSymbol = (EditText) findViewById(R.id.edit_symbol);
 
@@ -230,44 +236,93 @@ public class MainActivity extends ActionBarActivity {
 
         Log.i(TAG, "displayResponse");
 
-        updateTextView(R.id.tv_symbol, SYMBOL);
+        //tag's name changed
+        /*updateTextView(R.id.tv_symbol, SYMBOL);
         updateTextView(R.id.tv_company, COMPANY);
         updateTextView(R.id.tv_exchange, EXCHANGE);
         updateTextView(R.id.tv_volume, VOLUME);
         updateTextView(R.id.tv_last, LAST);
         updateTextView(R.id.tv_change, CHANGE);
-        updateTextView(R.id.tv_perc_change, PERC_CHANGE);
+        updateTextView(R.id.tv_perc_change, PERC_CHANGE);*/
 
-        //todo
-        if (hmStockData.containsKey(CHART_URL)) {
+        //new naming
+        updateTextView(R.id.tv_symbol, "t");//股票代號
+        updateTextView(R.id.tv_company, "name");//公司
+        updateTextView(R.id.tv_open, "op");//開盤
+        updateTextView(R.id.tv_l_cur, "l_cur");//成交
+        updateTextView(R.id.tv_volume, "vo");//總量
+        updateTextView(R.id.tv_cp, "cp_fix");//漲幅
+        updateTextView(R.id.tv_high, "hi");//最高
+        updateTextView(R.id.tv_low, "lo");//最低
+        updateTextView(R.id.tv_c, "c_fix");//漲跌
+        updateTextView(R.id.tv_pcls, "pcls_fix");//昨收
+        updateTextView(R.id.tv_hi52, "hi52");//52週高價
+        updateTextView(R.id.tv_lo52, "lo52");//52週低價
+        updateTextView(R.id.tv_pe, "pe");//The price/earnings ratio.
+        updateTextView(R.id.tv_eps, "eps");//The earnings per share.
+        updateTextView(R.id.tv_shares, "shares");//The number of outstanding shares.
+        updateTextView(R.id.tv_mc, "mc");//The market capitalization of the stock.
+        updateTextView(R.id.tv_ccol, "ccol");//?
 
-            String chartURL = hmStockData.get(CHART_URL);
 
-            String googleChart = GOOGLE_URL + chartURL;
+        ivChart.setImageBitmap(bmImg);
 
-            ImageView ivChart = (ImageView) findViewById(R.id.img_chart);
+        //change old resolution
+//        if  (hmStockData.containsKey(CHART_URL)) {
 
-            try {
-                Log.i(TAG, "Chart bitmap from URL");
+//            String chartURL = hmStockData.get(CHART_URL);
 
-                URL googleChartURL = new URL(googleChart);
-                HttpURLConnection conn = (HttpURLConnection) googleChartURL.openConnection();
-                conn.setDoInput(true);
-                conn.connect();
+//            String googleChart = GOOGLE_URL + chartURL;
 
-                InputStream is = conn.getInputStream();
+        //new url for get chart
+        //String googleChart = GOOGLE_URL + CHART_URL + symbol;
 
-                Bitmap bmImg = BitmapFactory.decodeStream(is);
+        //ImageView ivChart = (ImageView) findViewById(R.id.img_chart);
 
-                ivChart.setImageBitmap(bmImg);
+        //not working at new android version
+        /*try {
+            Log.i(TAG, "Chart bitmap from URL");
 
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
+            URL googleChartURL = new URL(googleChart);
+            HttpURLConnection conn = (HttpURLConnection) googleChartURL.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
 
-            }
+            InputStream is = conn.getInputStream();
+
+            Bitmap bmImg = BitmapFactory.decodeStream(is);
+
+            ivChart.setImageBitmap(bmImg);
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+
+        }*/
+
+//        }
+
+    }
+
+    private void chartResponse()
+    {
+        String googleChart = GOOGLE_URL + CHART_URL + symbol;
+
+        try {
+            Log.i(TAG, "Chart bitmap from URL");
+
+            URL googleChartURL = new URL(googleChart);
+            HttpURLConnection conn = (HttpURLConnection) googleChartURL.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+
+            InputStream is = conn.getInputStream();
+
+            bmImg = BitmapFactory.decodeStream(is);
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
 
         }
-
     }
 
     private class StockRetrieveTask extends AsyncTask<String, Void, String> {
@@ -294,6 +349,9 @@ public class MainActivity extends ActionBarActivity {
         protected String doInBackground(String... urls) {
 
             Log.i(TAG, "doInBackground");
+
+            //thread resolution
+            chartResponse();
 
             StringBuilder sb = new StringBuilder();
 

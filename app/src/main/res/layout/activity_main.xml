@@ -6,6 +6,10 @@
 
     >
 
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
@@ -72,13 +76,30 @@
             android:padding="10dip" >
 
             <TextView
-                android:id="@+id/lbl_exchange"
+                android:id="@+id/lbl_open"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:text="@string/exchange" />
+                android:text="@string/open" />
 
             <TextView
-                android:id="@+id/tv_exchange"
+                android:id="@+id/tv_open"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_l_cur"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/l_cur" />
+
+            <TextView
+                android:id="@+id/tv_l_cur"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>
@@ -106,6 +127,229 @@
             android:padding="10dip" >
 
             <TextView
+                android:id="@+id/lbl_cp"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/cp" />
+
+            <TextView
+                android:id="@+id/tv_cp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_high"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/high" />
+
+            <TextView
+                android:id="@+id/tv_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_low"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/low" />
+
+            <TextView
+                android:id="@+id/tv_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_c"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/c" />
+
+            <TextView
+                android:id="@+id/tv_c"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_pcls"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/pcls" />
+
+            <TextView
+                android:id="@+id/tv_pcls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_hi52"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/hi52" />
+
+            <TextView
+                android:id="@+id/tv_hi52"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_lo52"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/lo52" />
+
+            <TextView
+                android:id="@+id/tv_lo52"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_pe"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/pe" />
+
+            <TextView
+                android:id="@+id/tv_pe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_eps"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/eps" />
+
+            <TextView
+                android:id="@+id/tv_eps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_shares"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/shares" />
+
+            <TextView
+                android:id="@+id/tv_shares"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_mc"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/mc" />
+
+            <TextView
+                android:id="@+id/tv_mc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_ccol"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/ccol" />
+
+            <TextView
+                android:id="@+id/tv_ccol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <!--<TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
+                android:id="@+id/lbl_exchange"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:text="@string/exchange" />
+
+            <TextView
+                android:id="@+id/tv_exchange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>-->
+
+
+
+        <!--<TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dip" >
+
+            <TextView
                 android:id="@+id/lbl_last"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
@@ -115,9 +359,9 @@
                 android:id="@+id/tv_last"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-        </TableRow>
+        </TableRow>-->
 
-        <TableRow
+        <!--<TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dip" >
@@ -132,9 +376,9 @@
                 android:id="@+id/tv_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-        </TableRow>
+        </TableRow>-->
 
-        <TableRow
+        <!--<TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dip" >
@@ -149,7 +393,7 @@
                 android:id="@+id/tv_perc_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-        </TableRow>
+        </TableRow>-->
 
         <TableRow
             android:layout_width="match_parent"
@@ -165,5 +409,7 @@
                 android:contentDescription="@string/stock_chart" />
         </TableRow>
     </TableLayout>
+
+    </ScrollView>
 
 </LinearLayout>
