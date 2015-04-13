@@ -4,13 +4,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.util.Xml;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,19 +20,17 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -46,6 +46,30 @@ public class MainActivity extends ActionBarActivity {
     //private static final String GOOGLE_STOCK_URL = "http://www.google.com/ig/api";
     //2015 available URL
     private static final String GOOGLE_STOCK_URL = "http://www.google.com/finance/info?infotype=infoquoteall&q=";
+    //Yahoo Stock API : historical data csv
+    private static final  String YAHOO_STOCK_CSV_URL
+            = "http://ichart.yahoo.com/table.csv?s=";
+    /*
+    a – 起始时间，月
+    b – 起始时间，日
+    c – 起始时间，年
+    d – 结束时间，月
+    e – 结束时间，日
+    f – 结束时间，年
+    g – 时间周期。Example: g=w, 表示周期是’周’。d->’日’(day), w->’周’(week)，m->’月’(mouth)，v->’dividends only’
+    */
+    private static  final  String YAHOO_PARAM
+            = "&a=<int>&b=<int>&c=<int>&d=<int>&e=<int>&f=<int>&g=w&ignore=.csv";
+    //popup k-chart
+    private PopupWindow mPopupWindow;
+    // 屏幕的width
+    private int mScreenWidth;
+    // 屏幕的height
+    private int mScreenHeight;
+    // PopupWindow的width
+    private int mPopupWindowWidth;
+    // PopupWindow的height
+    private int mPopupWindowHeight;
 
     // This URL is used when retrieving the stock activity chart image.
     private static final String GOOGLE_URL = "http://www.google.com";
@@ -88,6 +112,14 @@ public class MainActivity extends ActionBarActivity {
         bnRetrieve = (Button) findViewById(R.id.bn_retrieve);
 
         ivChart = (ImageView) findViewById(R.id.img_chart);
+        ivChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getPopupWindowInstance();
+                mPopupWindow.showAtLocation(v, Gravity.CENTER, 0, 0);
+                //mPopupWindow.update(0, 0, mPopupWindowWidth, mPopupWindowHeight);
+            }
+        });
 
         edSymbol = (EditText) findViewById(R.id.edit_symbol);
 
@@ -394,6 +426,43 @@ public class MainActivity extends ActionBarActivity {
 
         }
 
+    }
+
+    /*
+    * 获取PopupWindow实例
+    */
+    private void getPopupWindowInstance() {
+        if (null != mPopupWindow) {
+            mPopupWindow.dismiss();
+            return;
+        } else {
+            initPopuptWindow();
+        }
+    }
+
+    private void initPopuptWindow()
+    {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View popupWindow = layoutInflater.inflate(R.layout.popup_window, null);
+
+        TextView tv_kChart = (TextView)popupWindow.findViewById(R.id.tv_kChart);
+
+        /*
+                创建一个PopupWindow
+                参数1：contentView 指定PopupWindow的内容
+                参数2：width 指定PopupWindow的width
+                参数3：height 指定PopupWindow的height
+                */
+        mPopupWindow = new PopupWindow(popupWindow, 100, 130);
+        //these three lines disappear with outside touchable
+        mPopupWindow.setTouchable(true);
+        mPopupWindow.setOutsideTouchable(true);
+        mPopupWindow.setBackgroundDrawable(new BitmapDrawable(getResources(), (Bitmap) null));
+        // 获取屏幕和PopupWindow的width和height
+        mScreenWidth = getWindowManager().getDefaultDisplay().getWidth();
+        mScreenWidth = getWindowManager().getDefaultDisplay().getHeight();
+        mPopupWindowWidth = mPopupWindow.getWidth();
+        mPopupWindowHeight = mPopupWindow.getHeight();
     }
 
     @Override
