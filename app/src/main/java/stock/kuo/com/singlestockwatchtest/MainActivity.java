@@ -1,5 +1,6 @@
 package stock.kuo.com.singlestockwatchtest;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -33,6 +35,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -440,6 +444,8 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+
+
     private void initPopuptWindow()
     {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -447,13 +453,74 @@ public class MainActivity extends ActionBarActivity {
 
         TextView tv_kChart = (TextView)popupWindow.findViewById(R.id.tv_kChart);
 
+        final TextView tv_start = (TextView)popupWindow.findViewById(R.id.tv_start);
+        final TextView tv_end = (TextView)popupWindow.findViewById(R.id.tv_end);
+
+        //calendar
+        final Calendar myCalendar = Calendar.getInstance();
+
+        //start date
+        final DatePickerDialog.OnDateSetListener start_date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                // TODO Auto-generated method stub
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                String myFormat = "yyyy-MM-dd";
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
+                tv_start.setText(sdf.format(myCalendar.getTime()));
+            }
+
+        };
+        //start date
+        final DatePickerDialog.OnDateSetListener end_date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                // TODO Auto-generated method stub
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                String myFormat = "yyyy-MM-dd";
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
+                tv_end.setText(sdf.format(myCalendar.getTime()));
+            }
+
+        };
+
+        tv_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, start_date,
+                        myCalendar.get(Calendar.YEAR),
+                        myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+        tv_end.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, end_date,
+                        myCalendar.get(Calendar.YEAR),
+                        myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
         /*
                 创建一个PopupWindow
                 参数1：contentView 指定PopupWindow的内容
                 参数2：width 指定PopupWindow的width
                 参数3：height 指定PopupWindow的height
                 */
-        mPopupWindow = new PopupWindow(popupWindow, 100, 130);
+        mPopupWindow = new PopupWindow(popupWindow, 800, 1040);
         //these three lines disappear with outside touchable
         mPopupWindow.setTouchable(true);
         mPopupWindow.setOutsideTouchable(true);
