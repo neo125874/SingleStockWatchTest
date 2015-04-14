@@ -28,6 +28,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.CandleStickChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.CandleData;
 import com.github.mikephil.charting.data.CandleDataSet;
@@ -128,6 +129,8 @@ public class MainActivity extends ActionBarActivity {
     private ArrayList<CandleEntry> yVals1;
     private CandleDataSet set1;
     private CandleStickChart candleStickChart;
+    private TextView tv_start, tv_end;
+    private Button btn_go;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -457,12 +460,9 @@ public class MainActivity extends ActionBarActivity {
     * 获取PopupWindow实例
     */
     private void getPopupWindowInstance() {
-        if (null != mPopupWindow) {
+        if (null != mPopupWindow)
             mPopupWindow.dismiss();
-            return;
-        } else {
-            initPopuptWindow();
-        }
+        initPopuptWindow();
     }
 
 
@@ -482,6 +482,32 @@ public class MainActivity extends ActionBarActivity {
 
         //k-chart
         candleStickChart = (CandleStickChart)popupWindow.findViewById(R.id.k_chart);
+        candleStickChart.setDescription("");
+
+        // if more than 60 entries are displayed in the chart, no values will be
+        // drawn
+        candleStickChart.setMaxVisibleValueCount(60);
+
+        // scaling can now only be done on x- and y-axis separately
+        candleStickChart.setPinchZoom(false);
+
+        candleStickChart.setDrawGridBackground(false);
+
+        XAxis xAxis = candleStickChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setSpaceBetweenLabels(2);
+        xAxis.setDrawGridLines(false);
+
+        YAxis leftAxis = candleStickChart.getAxisLeft();
+        leftAxis.setLabelCount(7);
+        leftAxis.setDrawGridLines(false);
+        leftAxis.setDrawAxisLine(false);
+        leftAxis.setStartAtZero(false);
+
+        YAxis rightAxis = candleStickChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+        candleStickChart.getLegend().setEnabled(false);
 
         //calendar
         final Calendar myCalendar = Calendar.getInstance();
@@ -575,7 +601,7 @@ public class MainActivity extends ActionBarActivity {
                 参数2：width 指定PopupWindow的width
                 参数3：height 指定PopupWindow的height
                 */
-        mPopupWindow = new PopupWindow(popupWindow, 300, 390);
+        mPopupWindow = new PopupWindow(popupWindow, 800, 1040);
         //these three lines disappear with outside touchable
         mPopupWindow.setTouchable(true);
         mPopupWindow.setOutsideTouchable(true);
@@ -643,6 +669,14 @@ public class MainActivity extends ActionBarActivity {
 
                 candleStickChart.setData(data);
                 candleStickChart.invalidate();
+
+                //hide the option
+                tv_start = (TextView)mPopupWindow.getContentView().findViewById(R.id.tv_start);
+                tv_end = (TextView)mPopupWindow.getContentView().findViewById(R.id.tv_end);
+                btn_go = (Button)mPopupWindow.getContentView().findViewById(R.id.btn_go);
+                tv_start.setVisibility(View.GONE);
+                tv_end.setVisibility(View.GONE);
+                btn_go.setVisibility(View.GONE);
             }
 
             pDlg.dismiss();
@@ -664,6 +698,8 @@ public class MainActivity extends ActionBarActivity {
             try {
                 String line;
                 int i = 0;
+                xVals = new ArrayList<String>();
+                yVals1 = new ArrayList<CandleEntry>();
                 while ((line = reader.readLine()) != null) {
 
                     //skip
@@ -680,14 +716,13 @@ public class MainActivity extends ActionBarActivity {
                     float low = Float.parseFloat(RowData[3]);
                     float close = Float.parseFloat(RowData[4]);
 
-                    boolean even = i % 2 == 0;
+                    //boolean even = i % 2 == 0;
 
-                    xVals = new ArrayList<String>();
-                    yVals1 = new ArrayList<CandleEntry>();
                     yVals1.add(new CandleEntry(i,
-                            high, -low,
-                            even ? open : -open,
-                            even ? -close : close));
+                            high,
+                            low,
+                            open,
+                            close));
                     xVals.add("" + i);
 
                     i++;

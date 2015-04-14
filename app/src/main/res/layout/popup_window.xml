@@ -35,9 +35,9 @@
             android:layout_height="wrap_content"
             android:text="請選擇"
             android:id="@+id/tv_end"
-            android:layout_below="@+id/tv_end"
-            android:layout_alignLeft="@+id/tv_end"
-            android:layout_alignStart="@+id/tv_end"
+            android:layout_below="@+id/tv_start"
+            android:layout_alignLeft="@+id/tv_start"
+            android:layout_alignStart="@+id/tv_start"
             android:layout_marginTop="43dp" />
 
         <com.github.mikephil.charting.charts.CandleStickChart
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:text="Go"
             android:id="@+id/btn_go"
-            android:layout_alignTop="@+id/tv_start"
+            android:layout_alignBottom="@+id/tv_end"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
     </RelativeLayout>
