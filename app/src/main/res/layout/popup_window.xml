@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="請選擇"
-            android:id="@+id/tv_end"
+            android:id="@+id/tv_start"
             android:layout_gravity="right"
             android:layout_marginLeft="34dp"
             android:layout_marginStart="34dp"
@@ -34,11 +34,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="請選擇"
-            android:id="@+id/tv_start"
+            android:id="@+id/tv_end"
             android:layout_below="@+id/tv_end"
             android:layout_alignLeft="@+id/tv_end"
             android:layout_alignStart="@+id/tv_end"
             android:layout_marginTop="43dp" />
+
+        <com.github.mikephil.charting.charts.CandleStickChart
+            android:id="@+id/k_chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go"
+            android:id="@+id/btn_go"
+            android:layout_alignTop="@+id/tv_start"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
 

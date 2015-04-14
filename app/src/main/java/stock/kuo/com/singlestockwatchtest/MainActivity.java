@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,17 +27,28 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.CandleStickChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,8 +75,10 @@ public class MainActivity extends ActionBarActivity {
     f – 结束时间，年
     g – 时间周期。Example: g=w, 表示周期是’周’。d->’日’(day), w->’周’(week)，m->’月’(mouth)，v->’dividends only’
     */
-    private static  final  String YAHOO_PARAM
-            = "&a=<int>&b=<int>&c=<int>&d=<int>&e=<int>&f=<int>&g=w&ignore=.csv";
+    private static int a, b, c,
+        d, e, f;
+    private static final  String YAHOO_PARAM
+            = "&g=w&ignore=.csv";
     //popup k-chart
     private PopupWindow mPopupWindow;
     // 屏幕的width
@@ -107,6 +122,12 @@ public class MainActivity extends ActionBarActivity {
     //new chart method
     private ImageView ivChart = null;
     private static Bitmap bmImg = null;
+
+    //k-chart
+    private ArrayList<String> xVals;
+    private ArrayList<CandleEntry> yVals1;
+    private CandleDataSet set1;
+    private CandleStickChart candleStickChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -456,6 +477,12 @@ public class MainActivity extends ActionBarActivity {
         final TextView tv_start = (TextView)popupWindow.findViewById(R.id.tv_start);
         final TextView tv_end = (TextView)popupWindow.findViewById(R.id.tv_end);
 
+        //go
+        Button btn_go = (Button)popupWindow.findViewById(R.id.btn_go);
+
+        //k-chart
+        candleStickChart = (CandleStickChart)popupWindow.findViewById(R.id.k_chart);
+
         //calendar
         final Calendar myCalendar = Calendar.getInstance();
 
@@ -470,13 +497,18 @@ public class MainActivity extends ActionBarActivity {
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
+                //月，日，年
+                a = monthOfYear;
+                b = dayOfMonth;
+                c = year;
+
                 String myFormat = "yyyy-MM-dd";
                 SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
                 tv_start.setText(sdf.format(myCalendar.getTime()));
             }
 
         };
-        //start date
+        //end date
         final DatePickerDialog.OnDateSetListener end_date = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -486,6 +518,11 @@ public class MainActivity extends ActionBarActivity {
                 myCalendar.set(Calendar.YEAR, year);
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                //月，日，年
+                d = monthOfYear;
+                e = dayOfMonth;
+                f = year;
 
                 String myFormat = "yyyy-MM-dd";
                 SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
@@ -514,13 +551,31 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        //fetch data
+        btn_go.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /* 這邊要用 Thread 是因為 Android 改版之後會對在主程式裡跑網路連接的程式碼做 Exception 的意外排除動作
+                                * 因此要把網路連線使用多執行緒的方式去運行，才不會被當成例外錯誤拋出
+                                */
+                String request = YAHOO_STOCK_CSV_URL + symbol +
+                        ".tw" +
+                        "&a=" + a + "&b=" + b + "&c=" + c + "&d=" + d + "&e=" + e + "&f=" + f +
+                        YAHOO_PARAM;
+
+                ChartRetrieveTask task = new ChartRetrieveTask();
+
+                task.execute(new String[]{request});
+            }
+        });
+
         /*
                 创建一个PopupWindow
                 参数1：contentView 指定PopupWindow的内容
                 参数2：width 指定PopupWindow的width
                 参数3：height 指定PopupWindow的height
                 */
-        mPopupWindow = new PopupWindow(popupWindow, 800, 1040);
+        mPopupWindow = new PopupWindow(popupWindow, 300, 390);
         //these three lines disappear with outside touchable
         mPopupWindow.setTouchable(true);
         mPopupWindow.setOutsideTouchable(true);
@@ -530,6 +585,130 @@ public class MainActivity extends ActionBarActivity {
         mScreenWidth = getWindowManager().getDefaultDisplay().getHeight();
         mPopupWindowWidth = mPopupWindow.getWidth();
         mPopupWindowHeight = mPopupWindow.getHeight();
+    }
+
+    private class ChartRetrieveTask extends AsyncTask<String, Void, Boolean> {
+
+        private static final String TAG = "ChartRetrieveTask";
+
+        private ProgressDialog pDlg = null;
+
+        @Override
+        protected void onPreExecute() {
+
+            Log.i(TAG, "onPreExecute");
+
+            hideKeyboard();
+
+            pDlg = createProgressDialog(MainActivity.this,
+                    getString(R.string.retrieving));
+
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Boolean doInBackground(String... urls) {
+
+            Log.i(TAG, "doInBackground");
+
+            // Remember that the array will only have one String
+            String url = urls[0];
+            try
+            {
+                getKchartData(url);
+                return true;
+            }
+            catch(Exception e)
+            {
+                Log.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean response) {
+
+            if(response)
+            {
+                set1 = new CandleDataSet(yVals1, "Data Set");
+                set1.setAxisDependency(YAxis.AxisDependency.LEFT);
+                set1.setShadowColor(Color.DKGRAY);
+                set1.setShadowWidth(0.7f);
+                set1.setDecreasingColor(Color.RED);
+                set1.setDecreasingPaintStyle(Paint.Style.STROKE);
+                set1.setIncreasingColor(Color.rgb(122, 242, 84));
+                set1.setIncreasingPaintStyle(Paint.Style.FILL);
+                CandleData data = new CandleData(xVals, set1);
+
+                candleStickChart.setData(data);
+                candleStickChart.invalidate();
+            }
+
+            pDlg.dismiss();
+
+        }
+
+    }
+
+    private void getKchartData(String strUrl)
+    {
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpContext localContext = new BasicHttpContext();
+        HttpGet httpGet = new HttpGet(strUrl);
+        try
+        {
+            HttpResponse response = httpClient.execute(httpGet, localContext);
+            InputStream is = response.getEntity().getContent();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            try {
+                String line;
+                int i = 0;
+                while ((line = reader.readLine()) != null) {
+
+                    //skip
+                    if(i==0)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    String[] RowData = line.split(",");
+
+                    float open = Float.parseFloat(RowData[1]);
+                    float high = Float.parseFloat(RowData[2]);
+                    float low = Float.parseFloat(RowData[3]);
+                    float close = Float.parseFloat(RowData[4]);
+
+                    boolean even = i % 2 == 0;
+
+                    xVals = new ArrayList<String>();
+                    yVals1 = new ArrayList<CandleEntry>();
+                    yVals1.add(new CandleEntry(i,
+                            high, -low,
+                            even ? open : -open,
+                            even ? -close : close));
+                    xVals.add("" + i);
+
+                    i++;
+                }
+            }
+            catch (IOException ex) {
+                // handle exception
+            }
+            finally {
+                try {
+                    is.close();
+                }
+                catch (IOException e) {
+                    // handle exception
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     @Override
