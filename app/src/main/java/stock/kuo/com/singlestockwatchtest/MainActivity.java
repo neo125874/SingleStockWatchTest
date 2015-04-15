@@ -19,11 +19,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -41,6 +44,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -80,6 +87,21 @@ public class MainActivity extends ActionBarActivity {
         d, e, f;
     private static final  String YAHOO_PARAM
             = "&g=w&ignore=.csv";
+    //yahoo headlines
+    private static final String YAHOO_HEADLINES = "http://finance.yahoo.com/rss/headline?s=";
+    private PopupWindow pwindo;
+    String key_copyright = "copyright";
+    String key_items = "item";
+    String key_title = "title";
+    String key_link = "link";
+    String key_description = "description";
+    String key_date = "pubDate";
+    ListView lstPost = null;
+    List<HashMap<String, Object>> post_lists = new ArrayList<HashMap<String, Object>>();
+    List<String> lists = new ArrayList<String>();
+    ArrayAdapter<String> adapter = null;
+    RSSReader rssfeed = new RSSReader();
+
     //popup k-chart
     private PopupWindow mPopupWindow;
     // 屏幕的width
@@ -601,7 +623,7 @@ public class MainActivity extends ActionBarActivity {
                 参数2：width 指定PopupWindow的width
                 参数3：height 指定PopupWindow的height
                 */
-        mPopupWindow = new PopupWindow(popupWindow, 800, 1040);
+        mPopupWindow = new PopupWindow(popupWindow, 400, 520);
         //these three lines disappear with outside touchable
         mPopupWindow.setTouchable(true);
         mPopupWindow.setOutsideTouchable(true);
@@ -753,6 +775,60 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
+    private void openPopupWebview()
+    {
+        try {
+            // We need to get the instance of the LayoutInflater
+            LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.popup_webview,null);
+            if(null != pwindo)
+                pwindo.dismiss();
+            pwindo = new PopupWindow(layout, 350, 350, true);
+            pwindo.setTouchable(true);
+            pwindo.setOutsideTouchable(true);
+            pwindo.setBackgroundDrawable(new BitmapDrawable(getResources(), (Bitmap) null));
+
+            /*WebView webView = (WebView)layout.findViewById(R.id.popup_webview);
+                            webView.loadUrl(YAHOO_HEADLINES + symbol);*/
+
+            //yahoo headlines rss
+            String yahooHeadlinesUrl = YAHOO_HEADLINES + symbol + ".tw";
+            lstPost = (ListView) layout.findViewById(R.id.lstPosts);
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, android.R.id.text1, lists)
+            {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent)
+                {
+                    View view = super.getView(position, convertView, parent);
+                    TextView txt1 = (TextView) view.findViewById(android.R.id.text1);
+                    TextView txt2 = (TextView) view.findViewById(android.R.id.text2);
+                    HashMap<String, Object> data = post_lists.get(position);
+                    txt1.setText(data.get(key_title).toString());
+                    txt2.setText(data.get(key_description).toString());
+                    return view;
+                }
+            };
+            Document xmlFeed = rssfeed.getRSSFromServer(yahooHeadlinesUrl);
+            NodeList nodes = xmlFeed.getElementsByTagName("item");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Element item = (Element) nodes.item(i);
+                HashMap<String, Object> feed = new HashMap<String, Object>();
+                feed.put(key_title, rssfeed.getValue(item, key_title));
+                feed.put(key_description, rssfeed.getValue(item, key_description));
+                feed.put(key_link, rssfeed.getValue(item, key_link));
+                feed.put(key_date, rssfeed.getValue(item, key_date));
+                post_lists.add(feed);
+                lists.add(feed.get(key_title).toString());
+            }
+            lstPost.setAdapter(adapter);
+
+            pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -761,8 +837,13 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.yahoo_headline) {
+            //open android webview
+            if(symbol.length() > 0)
+            {
+                openPopupWebview();
+                return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);
