@@ -19,9 +19,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -46,6 +44,7 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
@@ -88,7 +87,9 @@ public class MainActivity extends ActionBarActivity {
     private static final  String YAHOO_PARAM
             = "&g=w&ignore=.csv";
     //yahoo headlines
-    private static final String YAHOO_HEADLINES = "http://finance.yahoo.com/rss/headline?s=";
+    //private static final String YAHOO_HEADLINES = "http://finance.yahoo.com/rss/headline?s=";
+    private static final String YAHOO_HEADLINES = "https://feeds.finance.yahoo.com/rss/2.0/headline?s=";
+    private static final String YAHOO_HL_PARAM = ".tw&region=TW&lang=zh-Hant-TW";
     private PopupWindow pwindo;
     String key_copyright = "copyright";
     String key_items = "item";
@@ -97,9 +98,9 @@ public class MainActivity extends ActionBarActivity {
     String key_description = "description";
     String key_date = "pubDate";
     ListView lstPost = null;
-    List<HashMap<String, Object>> post_lists = new ArrayList<HashMap<String, Object>>();
-    List<String> lists = new ArrayList<String>();
-    ArrayAdapter<String> adapter = null;
+    // ListView使用的自定Adapter物件
+    private RSSFeedAdapter itemAdapter;
+    private List<RSSFeed> rssFeedList;
     RSSReader rssfeed = new RSSReader();
 
     //popup k-chart
@@ -783,7 +784,7 @@ public class MainActivity extends ActionBarActivity {
             View layout = inflater.inflate(R.layout.popup_webview,null);
             if(null != pwindo)
                 pwindo.dismiss();
-            pwindo = new PopupWindow(layout, 350, 350, true);
+            pwindo = new PopupWindow(layout, 350, 500, true);
             pwindo.setTouchable(true);
             pwindo.setOutsideTouchable(true);
             pwindo.setBackgroundDrawable(new BitmapDrawable(getResources(), (Bitmap) null));
@@ -792,24 +793,17 @@ public class MainActivity extends ActionBarActivity {
                             webView.loadUrl(YAHOO_HEADLINES + symbol);*/
 
             //yahoo headlines rss
-            String yahooHeadlinesUrl = YAHOO_HEADLINES + symbol + ".tw";
+            String yahooHeadlinesUrl = YAHOO_HEADLINES + symbol + YAHOO_HL_PARAM;
             lstPost = (ListView) layout.findViewById(R.id.lstPosts);
-            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, android.R.id.text1, lists)
-            {
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent)
-                {
-                    View view = super.getView(position, convertView, parent);
-                    TextView txt1 = (TextView) view.findViewById(android.R.id.text1);
-                    TextView txt2 = (TextView) view.findViewById(android.R.id.text2);
-                    HashMap<String, Object> data = post_lists.get(position);
-                    txt1.setText(data.get(key_title).toString());
-                    txt2.setText(data.get(key_description).toString());
-                    return view;
-                }
-            };
+
+            rssFeedList = new ArrayList<RSSFeed>();
+
+            itemAdapter = new RSSFeedAdapter(this, R.layout.rss_feed_list, rssFeedList);
+
             Document xmlFeed = rssfeed.getRSSFromServer(yahooHeadlinesUrl);
-            NodeList nodes = xmlFeed.getElementsByTagName("item");
+            //copyright
+            Node node = xmlFeed.getElementById(key_copyright);
+            NodeList nodes = xmlFeed.getElementsByTagName(key_items);
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element item = (Element) nodes.item(i);
                 HashMap<String, Object> feed = new HashMap<String, Object>();
@@ -817,10 +811,12 @@ public class MainActivity extends ActionBarActivity {
                 feed.put(key_description, rssfeed.getValue(item, key_description));
                 feed.put(key_link, rssfeed.getValue(item, key_link));
                 feed.put(key_date, rssfeed.getValue(item, key_date));
-                post_lists.add(feed);
-                lists.add(feed.get(key_title).toString());
+
+                //feed to rss class
+                rssFeedList.add(new RSSFeed(feed));
             }
-            lstPost.setAdapter(adapter);
+
+            lstPost.setAdapter(itemAdapter);
 
             pwindo.showAtLocation(layout, Gravity.CENTER, 0, 0);
 

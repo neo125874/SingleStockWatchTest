@@ -6,6 +6,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,7 +44,7 @@ public class RSSReader {
             HttpGet httpget =new HttpGet(url);
             HttpResponse httpResponse = httpClient.execute(httpget);
             HttpEntity httpEntity = httpResponse.getEntity();
-            xml = EntityUtils.toString(httpEntity);
+            xml = EntityUtils.toString(httpEntity, HTTP.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
